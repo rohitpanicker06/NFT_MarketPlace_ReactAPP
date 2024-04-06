@@ -75,7 +75,7 @@ function CreateNFT() {
   
       const tokenURI = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
   
-      // await mintNFT(tokenURI);
+       await mintNFT(tokenURI);
       
     };
 
