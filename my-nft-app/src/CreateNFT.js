@@ -2,23 +2,22 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
 import NFTMarketplaceABI from './NFTMarketPlaceABI.json';
-const ethers = require("ethers");
+import { useEthersSigner } from './getSigner';
+import { ethers } from 'ethers';
 
 function CreateNFT() {
 
     const [file, setFile] = useState(null);
     const [ipfsUrl, setIpfsUrl] = useState('');
     const [nftImage, setNftImage] = useState(''); 
-   
+
+    const signer = useEthersSigner()
   
     const mintNFT = async (tokenURI) => {
-      try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-  
+      try {        
+        if (!signer) return
         const contract = new ethers.Contract(
-          'YOUR_CONTRACT_ADDRESS', 
+          '0xdc205b043cc5aBc33e5d7B71f9f888b2F0a7A020', 
           NFTMarketplaceABI,
           signer
         );

@@ -1,23 +1,20 @@
 // MyNFTs.js
 import React, { useEffect, useState } from 'react';
 import NFTMarketplaceABI from './NFTMarketPlaceABI.json';
-const ethers = require("ethers");
+import { useEthersSigner } from './getSigner'
+import { ethers } from 'ethers';
 
+const contractAddress = "0xdc205b043cc5aBc33e5d7B71f9f888b2F0a7A020"
 
-
-function MyNFTs({ contractAddress }) {
+function MyNFTs() {
   const [nfts, setNfts] = useState([]);
 
+  const signer = useEthersSigner()
+
   const fetchMyNFTs = async () => {
-    if (!window.ethereum) {
-      console.log('Ethereum object not found, install MetaMask.');
-      return;
-    }
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
+      if (!signer) return
       const contract = new ethers.Contract(
         contractAddress,
         NFTMarketplaceABI,
@@ -25,10 +22,13 @@ function MyNFTs({ contractAddress }) {
       );
 
       const listedTokens = await contract.getMyNFTs();
-      const nftsWithURI = listedTokens.map(({ tokenId, owner }) => ({
+      const nftsWithURI = listedTokens.map(({ tokenId, owner, tokenURI }) => ({
         tokenId,
-        owner
+        owner,
+        tokenURI
       }));
+
+      console.log(nftsWithURI)
 
       setNfts(nftsWithURI);
     } catch (error) {
@@ -38,7 +38,7 @@ function MyNFTs({ contractAddress }) {
 
   useEffect(() => {
     fetchMyNFTs();
-  });
+  }, []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
