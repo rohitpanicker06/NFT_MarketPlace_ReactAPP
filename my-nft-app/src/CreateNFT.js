@@ -12,20 +12,48 @@ function CreateNFT() {
     const [nftImage, setNftImage] = useState(''); 
 
     const signer = useEthersSigner()
+
+    async function uploadMetadataToIpfs(tokenURI) {
+      try {
+        const metadata = {
+          fileName: "NFTFileName", 
+          description: "A dummy description for the NFT", 
+          image: tokenURI, 
+        };
+    
+        const response = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", metadata, {
+          headers: {
+            pinata_api_key: process.env.REACT_APP_PINATA_API_KEY,
+            pinata_secret_api_key: process.env.REACT_APP_PINATA_SECRET_API_KEY,
+          },
+        });
+    
+        const pinataUrl = `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
+        console.log("Metadata uploaded to " + pinataUrl);
+        return pinataUrl;
+      } catch (error) {
+        console.error("Error uploading metadata to IPFS:", error);
+        throw new Error("Failed to upload metadata to IPFS.");
+      }
+    }
+    
   
     const mintNFT = async (tokenURI) => {
       try {        
-        if (!signer) return
+         if (!signer) return
+
+        const metadataURI = await uploadMetadataToIpfs(tokenURI);
+
         const contract = new ethers.Contract(
           '0xdc205b043cc5aBc33e5d7B71f9f888b2F0a7A020', 
           NFTMarketplaceABI,
           signer
         );
   
-        const transaction = await contract.createToken(tokenURI);
+        const transaction = await contract.createToken(metadataURI);
         await transaction.wait();
   
-        console.log(`NFT Created with tokenURI: ${tokenURI}`);
+        console.log(`NFT Created with tokenURI: ${tokenURI} and metadataURI: ${metadataURI}`);
       } catch (error) {
         console.error("Error minting NFT:", error);
       }
@@ -42,6 +70,16 @@ function CreateNFT() {
         try {
           const fileData = new FormData();
           fileData.append("file", file);
+
+          const metadata = JSON.stringify({
+            name : 'testname',
+            keyvalues: {
+              exampleKey: 'exampleValue'
+            }
+          });
+
+          fileData.append("pinataMetadata",metadata);
+
   
           const responseData = await axios({
             method: "POST",
@@ -63,7 +101,6 @@ function CreateNFT() {
       } else if (ipfsUrl) {
         const urlParts = ipfsUrl.split('/');
         ipfsHash = urlParts[urlParts.length - 1];
-        //not storing ipfsHAsh for now, its TODO
         setNftImage(ipfsUrl);
       } else {
         console.log("No file or IPFS URL provided");
