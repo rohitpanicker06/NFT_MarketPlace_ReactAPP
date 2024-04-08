@@ -17,7 +17,7 @@ function CreateNFT() {
       try {        
         if (!signer) return
         const contract = new ethers.Contract(
-          '0xdc205b043cc5aBc33e5d7B71f9f888b2F0a7A020', 
+          '0xdc008489057cec453d9bd9fe4d096a10caf43512', 
           NFTMarketplaceABI,
           signer
         );

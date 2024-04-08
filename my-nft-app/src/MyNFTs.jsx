@@ -4,7 +4,7 @@ import NFTMarketplaceABI from './NFTMarketPlaceABI.json';
 import { useEthersSigner } from './getSigner'
 import { ethers } from 'ethers';
 
-const contractAddress = "0xdc205b043cc5aBc33e5d7B71f9f888b2F0a7A020"
+const contractAddress = "0xdc008489057cec453d9bd9fe4d096a10caf43512"
 
 function MyNFTs() {
   const [nfts, setNfts] = useState([]);
@@ -22,15 +22,25 @@ function MyNFTs() {
       );
 
       const listedTokens = await contract.getMyNFTs();
-      const nftsWithURI = listedTokens.map(({ tokenId, owner, tokenURI }) => ({
-        tokenId,
-        owner,
-        tokenURI
+
+      const nfts = await Promise.all(listedTokens.map(async i => {
+        const imageURI = await contract.tokenURI(i.tokenId);
+      
+        let nft = {
+          tokenId: i.tokenId,
+          image: imageURI
+        }
+        return nft;
       }));
+      // const nftsWithURI = listedTokens.map(({ tokenId, owner, tokenURI }) => ({
+      //   tokenId,
+      //   owner,
+      //   tokenURI
+      // }));
 
-      console.log(nftsWithURI)
+      console.log(nfts)
 
-      setNfts(nftsWithURI);
+      setNfts(nfts);
     } catch (error) {
       console.error("Error fetching NFTs:", error);
     }
@@ -44,10 +54,10 @@ function MyNFTs() {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <h2>My NFTs</h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {nfts.map(({ tokenId }, index) => (
+        {nfts.map(({ tokenId, image }, index) => (
           <div key={index} style={{ margin: '10px', width: '300px', textAlign: 'center' }}>
-            <img src={tokenId} alt={`NFT ${index}`} style={{ width: '100%', marginBottom: '10px' }} />
-            <p>Image URL: {tokenId}</p>
+            <img src={image} alt={`NFT ${index}`} style={{ width: '100%', marginBottom: '10px' }} />
+            <p>Image URL: {image}</p> {/* Display the correct image URL */}
           </div>
         ))}
       </div>

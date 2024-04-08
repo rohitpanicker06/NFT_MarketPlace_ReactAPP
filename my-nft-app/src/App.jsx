@@ -5,6 +5,7 @@ import MyNFTs from './MyNFTs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
 import { config } from './config'
+import { ConnectWallet } from './ConnectWallet';
 import './App.css';
 
 const queryClient = new QueryClient()
@@ -14,6 +15,7 @@ function App() {
     <Router>
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
+      <ConnectWallet />
       <div className="App" style={{ textAlign: 'center' }}>
         <h1>NFT MarketPlace</h1>
         <Link to="/"><button>Home</button></Link>
